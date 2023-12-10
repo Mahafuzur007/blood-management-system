@@ -28,5 +28,14 @@
                 <span class="count bg-primary">14</span>
             </a>
         </div>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+
+            <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
+                                this.closest('form').submit();">
+                {{ __('Log Out') }}
+            </x-responsive-nav-link>
+        </form>
     </div>
 </header>

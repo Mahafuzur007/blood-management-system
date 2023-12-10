@@ -2,134 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Divison;
-use App\Models\Profile;
-use App\Models\District;
-use App\Models\Upazilla;
-use App\Models\BloodGroup;
-use App\Models\PostOffice;
+use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the user's profile form.
      */
-    public function index()
+    public function edit(Request $request): View
     {
-        $profiles = Profile::latest()->get();
-        return view('admin.pages.profiles.index', compact('profiles'));
+        return view('profile.edit', [
+            'user' => $request->user(),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Update the user's profile information.
      */
-    public function create()
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $users = User::all();
-        $roles = Role::all();
-        $divisons = Divison::all();
-        $districts = District::all();
-        $upazillas = Upazilla::all();
-        $bloods = BloodGroup::all();
-        $postOffices = PostOffice::all();
-        return view('admin.pages.profiles.create', compact('users', 'roles', 'divisons', 'districts', 'upazillas', 'bloods', 'postOffices'));
+        $request->user()->fill($request->validated());
+
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
+        }
+
+        $request->user()->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Delete the user's account.
      */
-    public function store(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
-        $image = time() . '-' . $request->title . '.' . $request->image->extension();
-        $request->image->storeAs('public/images', $image);
-        Profile::create([
-            'user_id' => $request->name,
-            'gender' => $request->gender,
-            'age' => $request->age,
-            'dob' => $request->dob,
-            'image' => $image,
-            'last_donate' => $request->last_donate,
-            'donation_count' => $request->donation_count,
-            'blood_group_id' => $request->group,
-            'division_id' => $request->divison,
-            'district_id' => $request->district,
-            'upazillas_id' => $request->upazilla,
-            'post_office_id' => $request->post_office,
-            'village' => $request->village,
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
         ]);
 
-        return redirect()->route('profiles.index')->withStatus('New Profile Created Successfully');
-    }
+        $user = $request->user();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $profile = Profile::findOrFail($id);
-        return view('admin.pages.profiles.show', compact('profile'));
-    }
+        Auth::logout();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $profile = Profile::findOrFail($id);
-        $roles = Role::pluck('name', 'id')->toarray();
-        $divisons = Divison::pluck('name', 'id')->toarray();
-        $districts = District::pluck('name', 'id')->toarray();
-        $upazillas = Upazilla::pluck('name', 'id')->toarray();
-        $bloods = BloodGroup::pluck('group', 'id')->toarray();
-        $postOffices = PostOffice::pluck('name', 'id')->toarray();
-        return view('admin.pages.profiles.edit', compact('profile', 'roles', 'divisons', 'districts', 'upazillas', 'bloods', 'postOffices'));
-    }
+        $user->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $profile = Profile::findOrFail($id);
-        try {
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-            if ($request->hasFile('image')) {
-                $image = time() . '-' . $request->title . '.' . $request->image->extension();
-                $request->image->storeAs('public/images', $image);
-            }
-            // dd($request->all());
-            $profile->update([
-                // 'user_id' => $request->userId,
-                // 'gender' => $request->gender,
-                // 'age' => $request->age,
-                'image' => $image ?? $profile->image,
-                'last_donate' => $request->last_donate,
-                'dob' => $request->dob,
-                'donation_count' => $request->donation_count,
-                // 'blood_group_id' => $request->group,
-                'division_id' => $request->divison,
-                'district_id' => $request->district,
-                'upazillas_id' => $request->upazilla,
-                'post_office_id' => $request->postOffice,
-                'village' => $request->village,
-            ]);
-            return redirect()->route('profiles.index')->withStatus('Profile Updated Successfully');
-        } catch (QueryException $e) {
-            Log::error($e->getMessage());
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        Profile::destroy($id);
-        return redirect()->route('profiles.index')->withStatus('Profile Deleted Successfully');
+        return Redirect::to('/');
     }
 }

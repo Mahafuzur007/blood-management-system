@@ -24,7 +24,6 @@
                     </div>
                     <div class="col-md-9 nav-col">
                         <nav class="navbar navbar-expand-lg navbar-light">
-
                             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                                 <span class="navbar-toggler-icon"></span>
@@ -52,7 +51,7 @@
                                         <a class="nav-link" href="#contact">Contact US</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{route('dashboard')}}">Admin Login</a>
+                                        <a class="nav-link" href="{{route('login')}}">Admin Login</a>
                                     </li>
                                 </ul>
                             </div>
@@ -86,8 +85,9 @@
 
                         <div class=" vbh">
 
-                            <div class="btn btn-success  bounceInUp"> Register Now </div>
-                            <div class="btn btn-success  bounceInUp"> Login </div>
+                            <div><a class="btn btn-success  bounceInUp" href="{{route('register')}}">Register Now</a>
+                            </div>
+                            <div> <a class="btn btn-success  bounceInUp" href="{{route('login')}}">login</a> </div>
                         </div>
                     </div>
                 </div>
@@ -103,12 +103,12 @@
 
                         <div class=" vbh">
 
-                            <div class="btn btn-success  bounceInUp"> Register Now </div>
-                            <div class="btn btn-success  bounceInUp"> Login </div>
+                            <div><a class="btn btn-success  bounceInUp" href="{{route('register')}}">Register Now</a>
+                            </div>
+                            <div> <a class="btn btn-success  bounceInUp" href="{{route('login')}}">login</a> </div>
                         </div>
                     </div>
                 </div>
-
             </div>
             <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
